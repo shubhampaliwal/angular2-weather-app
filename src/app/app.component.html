@@ -1,0 +1,50 @@
+<header>
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="navbar-header">
+      <a href="/" class="navbar-brand">DaSh - Weather App</a>
+    </div>
+    <!--this group contains input and submit to type city name and submit-->
+    <div class="row nav navbar-nav navbar-right rightMargin">
+      <div class="col-sm-8 col-xs-12 searchBox">
+        <div class="input-group">
+          <input type="text" class="form-control simplebox curr" [(ngModel)]="cityName" placeholder="enter city name">
+          <span class="input-group-btn">
+            <button class="btn btn-default" type="button" (click)="showCityWeather(cityName)">Go!</button>
+          </span>
+        </div>
+      </div>
+      <!--this is to select type of unit of temperature i.e. metric or imperial-->
+      <div class="col-sm-4 hidden-xs hidden-sm">
+        <div class="row">
+          <div class="col-sm-6" *ngFor="let unit of units">
+            <label class="radio">
+          <input id="radio2" type="radio" name="radios" (click)="changeUnit(unit.value)" [value]="unit.value">
+          <span class="outer">
+            <span class="inner">
+            </span>
+          </span><sup>&nbsp;o&nbsp;</sup>{{unit.display}}
+        </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<!--below tag injects forecast data to its child WeatherComponent-->
+<weather-app [forecastData]="forecastData">Data Loading</weather-app>
+<!--this contains wiki extract of selected city-->
+<div class="container" *ngIf="forecastData.current">
+  <hr />
+  <br />
+  <h3>About {{forecastData.current.name}} :</h3>
+  <br />
+  <p>{{cityDetails}}</p>
+  <p *ngIf="!cityDetails">Sorry, Wikipedia is not yet updated about {{cityName}}'s little secret.</p>
+  <br />
+  <br />
+</div>
+<footer class="text-center">
+  <div class="container">
+    <p class="text-muted">Copyright &copy; DaSh.Work-2017</p>
+  </div>
+</footer>

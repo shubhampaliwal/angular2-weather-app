@@ -1,0 +1,130 @@
+<main *ngIf="forecastData.fiveDays">
+  <div class="row text-center">
+    <h1 class="cityNameAndCountry">{{forecastData.current.name}}, {{ forecastData.current.sys.country}}</h1>
+  </div>
+  <hr />
+  <div class="row">
+    <!--Panel to show forecastData.current temperature along with Humidity, Wind Speed, Sunrise and Sunset time-->
+    <div class="col-sm-4">
+      <div class="panel panel-default" *ngIf="forecastData.current" (click)="showWeather(forecastData.fiveDays.list,convertUnixToIst(forecastData.current.dt).split(',')[1].split(' ')[1])">
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-sm-8 weatherDesc">
+              <h1><img src="http://openweathermap.org/img/w/{{forecastData.current.weather[0].icon}}.png"><small class="curr">{{forecastData.current.weather[0].main}}</small></h1>
+            </div>
+            <div class="col-sm-4">
+              <h1><small>{{convertTemp(forecastData.current.main.temp)}}&#186;{{forecastData.chosenUnit}}</small></h1>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              Humidity : {{forecastData.current.main.humidity}} %
+            </div>
+          </div>
+          <br />
+          <div class="row">
+            <div class="col-sm-12">
+              Wind : {{forecastData.current.wind.speed}} km/h
+            </div>
+          </div>
+          <br />
+          <div class="row">
+            <div class="col-sm-6 text-center">
+              <span class="label label-warning">Sunrise</span> <br />{{ convertUnixToIst(forecastData.current.sys.sunrise).split(' ')[5] }} AM
+            </div>
+            <div class="col-sm-6 text-center">
+              <span class="label label-default">Sunset</span> <br />{{ convertUnixToIst(forecastData.current.sys.sunset).split(' ')[5] }} PM
+            </div>
+          </div>
+          <br />
+        </div>
+        <div class="panel-footer">{{convertUnixToIst(forecastData.current.dt)}}</div>
+      </div>
+      <div>
+      </div>
+    </div>
+    <!--Panels showing the weather data for next 4 days.It include Weather Detail, Min and Max Temp, Humidity, Wind Speed and Day-->
+    <div class="col-sm-8" *ngIf="forecastData.daily">
+      <div class="jumbotron">
+        <div class="row">
+          <div class="col-sm-3" *ngFor="let dailyWeather of [1,2,3,4]">
+            <div class="panel panel-default" (click)="showWeather(forecastData.fiveDays.list,convertUnixToIst(forecastData.daily.list[dailyWeather].dt).split(',')[1].split(' ')[1])">
+              <div class="panel-body">
+                <div class="row">
+                  <div class="col-sm-12 text-center weatherDesc">
+                    <img src="http://openweathermap.org/img/w/{{forecastData.daily.list[dailyWeather].weather[0].icon}}.png">{{forecastData.daily.list[dailyWeather].weather[0].main}}
+                  </div>
+                </div>
+                <br />
+                <div class="row text-center">
+                  <div class="col-sm-6 ">
+                    {{convertTemp(forecastData.daily.list[dailyWeather].temp.max)}}&#186;
+                  </div>
+                  <div class="col-sm-6 minTemp">
+                    {{convertTemp(forecastData.daily.list[dailyWeather].temp.min)}}&#186;
+                  </div>
+                </div>
+                <br />
+                <div class="row">
+                  <div class="col-sm-12">
+                    H:{{forecastData.daily.list[dailyWeather].humidity}}%
+                  </div>
+                </div>
+                <br />
+                <div class="row">
+                  <div class="col-sm-12">
+                    W:{{forecastData.daily.list[dailyWeather].speed}}km/h
+                  </div>
+                </div>
+                <br />
+              </div>
+              <div class="panel-footer text-center">{{convertUnixToIst(forecastData.daily.list[dailyWeather].dt).split(',')[0]}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--Jumbotron to show 3 hourly data for the selected date. It will show : Weather(Clear Sky, Rainy, etc),Temperature and Time -->
+  <div class="row jumbotron jumbotron-2" *ngIf="activeDate && !forecastData.reset">
+    <div class="col-sm-4">{{convertUnixToIst(activeDate[0].dt).split(' ')[0]}}</div>
+    <div class="col-sm-1 text-center allDayWeather" *ngFor="let data of activeDate">
+      <div class="row">
+        <img src="http://openweathermap.org/img/w/{{data.weather[0].icon}}.png">
+      </div>
+      <div class="row">
+        {{convertTemp(data.main.temp)}}&#186;
+      </div>
+      <div class="row">
+        {{data.dt_txt.split(' ')[1].split(':')[0]}}:00
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12 text-center">
+        <br />
+        <br />
+        <hr />
+        <p>Graphical View</p>
+        <hr />
+        <br />
+        <app-d3-chart [activeData]="activeDate"></app-d3-chart>
+        <br />
+        <br />
+      </div>
+    </div>
+  </div>
+  <!--jumbotron when no date is selected for 3 hourly data-->
+  <div class="row jumbotron jumbotron-2 text-center" *ngIf="!activeDate || forecastData.reset">
+    <span class="glyphicon glyphicon-hand-up" *ngIf="!noData"></span>
+    <span class="glyphicon glyphicon-thumbs-down" *ngIf="noData"></span>
+    <p *ngIf="!noData">Select day to get 3-hourly data</p>
+    <p *ngIf="noData">Data not available for selected Day, please choose different Day</p>
+  </div>
+  <!-- <app-barchart [data]="activeDate"></app-barchart> -->
+</main>
+<main *ngIf="!forecastData.fiveDays">
+  <div class="jumbotron text-center">
+    <span class="glyphicon glyphicon-thumbs-down"></span>
+    <p>Sorry, no data available for searched city. <br />Please try another city.</p>
+  </div>
+</main>
